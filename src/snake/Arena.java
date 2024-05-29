@@ -257,58 +257,32 @@ InputStream in;
         }
     }
 
+    /**
+     * Checks if snake crosses itself or borderlines
+     */
     private void checkCollision() {
         for (int z = snake_length; z > 0; z--) {
             if ((z > 5) && (x[0] == x[z]) && (y[0] == y[z])) {
-                inGame = false;
-                try {
-                    in = new FileInputStream("src\\beep.wav");
-                    //AudioStream audios = new AudioStream(in);
-                    //AudioPlayer.player.start(audios);
-                } catch(Exception e) { System.out.println(e.getMessage()); }
+                breakAndBeep();
             }
         }
 
-        if (y[0] >= arena_height) {
-            inGame = false;
-            try {
-                in = new FileInputStream("src\\beep.wav");
-                //AudioStream audios = new AudioStream(in);
-                //AudioPlayer.player.start(audios);
-            } catch(Exception e) { System.out.println(e.getMessage()); }
+        if (y[0] >= arena_height || y[0] < 0 || x[0] >= arena_width || x[0] < 0) {
+            breakAndBeep();
         }
 
-        if (y[0] < 0) {
-            inGame = false;
-            try {
-                in = new FileInputStream("src\\beep.wav");
-                //AudioStream audios = new AudioStream(in);
-                //AudioPlayer.player.start(audios);
-            }
-            catch (Exception e) { System.out.println(e.getMessage()); }
-        }
-
-        if (x[0] >= arena_width) {
-            inGame = false;
-            try {
-                in = new FileInputStream("src\\beep.wav");
-                //AudioStream audios = new AudioStream(in);
-                //AudioPlayer.player.start(audios);
-            } catch(Exception e) { System.out.println(e.getMessage()); }
-        }
-
-        if (x[0] < 0) {
-            inGame = false;
-            try {
-                in = new FileInputStream("src\\beep.wav");
-                //AudioStream audios = new AudioStream(in);
-                //AudioPlayer.player.start(audios);
-            } catch(Exception e) { System.out.println(e.getMessage()); }
-        }
-        
         if(!inGame) {
             timer.stop();
         }
+    }
+
+    private void breakAndBeep() {
+        inGame = false;
+        try {
+            in = new FileInputStream("src\\beep.wav");
+            //AudioStream audios = new AudioStream(in);
+            //AudioPlayer.player.start(audios);
+        } catch(Exception e) { System.out.println(e.getMessage()); }
     }
 
     private void placeDrinks() {
