@@ -6,10 +6,11 @@
 
 package snake;
 
-/**
+/*
  *
  * @author NDIAPPINK
  */
+
 import cls.ClassDB;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,30 +23,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Arena extends JPanel implements ActionListener{
+public class Arena extends JPanel implements ActionListener {
 InputStream in;
-JFrame ex;
     private final int arena_width = 400;
     private final int arena_height = 400;
     private final int ballSize = 10;
     private final int ALL_DOTS = 1000;
-    private final int RAND_POS = 30;
-    private final int DELAY = 1000;
     private int scores, highscore = 0;
-    private final int x[] = new int[ALL_DOTS];
-    private final int y[] = new int[ALL_DOTS];
+    private final int[] x = new int[ALL_DOTS];
+    private final int[] y = new int[ALL_DOTS];
     private int snake_length;
     private int drink_x;
     private int drink_y;
@@ -59,8 +55,7 @@ JFrame ex;
     private Image ball;
     private Image drink;
     private Image head;
-    private int key;
-   
+
     public Arena() {
         name();
         addKeyListener(new TAdapter());
@@ -71,14 +66,13 @@ JFrame ex;
         initGame();
     }
 
-    private void name(){
+    private void name() {
         name = JOptionPane.showInputDialog(this, "Please Input Your Name:");
         if (name == null) {
-            String defaultName = "Player1";
-            name = defaultName;
+            name = "Player1";
             //System.exit(0);
         } else {
-            if (name.equals(""))
+            if (name.isEmpty())
             {
                 JOptionPane.showMessageDialog(this,"Name Already Exist!");
                 name();
@@ -86,23 +80,19 @@ JFrame ex;
                 try
                 {
                     Connection c=ClassDB.getkoneksi();
-                    Statement st=(Statement)c.createStatement();
-                    String nameCheckQuery="Select * from score where nama = '" + name.toString()+"'";
+                    Statement st=c.createStatement();
+                    String nameCheckQuery="Select * from score where nama = '" + name +"'";
                     ResultSet r=st.executeQuery(nameCheckQuery);
-                    if (r.next())
+                    if (!r.next())
                     {
-                        return;
-                    } else {
                         try
                         {
-                            st.executeUpdate("Insert into score(nama) values('" + name.toString() + "')");
+                            st.executeUpdate("Insert into score(nama) values('" + name + "')");
                         } catch(Exception e) {
-                            System.out.println(e);
+                            System.out.println(e.getMessage());
                         }
                     }
-                } catch(Exception e) {
-                    System.out.println(e);
-                }
+                } catch(Exception e) { System.out.println(e.getMessage()); }
             }
         }
     }
@@ -130,6 +120,7 @@ JFrame ex;
 
         placeDrinks();
 
+        int DELAY = 200;
         timer = new Timer(DELAY, this);
         timer.start();
     }
@@ -139,11 +130,11 @@ JFrame ex;
 
         doDrawing(g);
     }
-    private void updateScores(){
+    private void updateScores() {
          try {
             Connection c=ClassDB.getkoneksi();
             Statement s=c.createStatement();
-            String sqel = "UPDATE score Set score ='" + scores +"' where nama = '" + name.toString()+ "'";
+            String sqel = "UPDATE score Set score ='" + scores +"' where nama = '" + name + "'";
             s.executeUpdate(sqel);
             /*
             String cektinggi="Select * from score where nama = '" + name.toString() +"'";
@@ -167,6 +158,7 @@ JFrame ex;
             System.out.println(e.getMessage());
         }
     }
+
     private void doDrawing(Graphics g) {
         
         if (inGame) {
@@ -201,162 +193,117 @@ JFrame ex;
                 String scr = "Biggest Score "+r.getString("nama")+" = "+highscore;
                 g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
             }
-            else{
+            else {
                 String scr = "Biggest Score = 0";
                g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
             }
-            
             r.close();
             s.close();
-           
-        }catch(Exception e) {
-            System.out.println(e);
-        }
-
-        } else {
-            gameOver(g);         
-        }        
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        } else { gameOver(g);}
     }
     private void gameOver(Graphics g) {
         updateScores();
-        if (scores <= highscore){
+        if (scores <= highscore) {
             String msg = "Your Score: = "+ scores;
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
+            Font small = new Font("Helvetica", Font.BOLD, 14);
+            FontMetrics metr = getFontMetrics(small);
 
-        g.setColor(Color.white);
-        g.setFont(small);
-        g.drawString(msg, (arena_width - metr.stringWidth(msg)) / 2, arena_height / 2);
-       
+            g.setColor(Color.white);
+            g.setFont(small);
+         g.drawString(msg, (arena_width - metr.stringWidth(msg)) / 2, arena_height / 2);
         }
-        else{
+        else {
             String msgg = "Congratulation High Score = "+ scores;
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
+            Font small = new Font("Helvetica", Font.BOLD, 14);
+            FontMetrics metr = getFontMetrics(small);
 
-        g.setColor(Color.blue);
-        g.setFont(small);
-        g.drawString(msgg, (arena_width - metr.stringWidth(msgg)) / 2, arena_height / 2);
+            g.setColor(Color.blue);
+            g.setFont(small);
+            g.drawString(msgg, (arena_width - metr.stringWidth(msgg)) / 2, arena_height / 2);
         }
     }
     
-       
     private void checkDrink() {
-
         if ((x[0] == drink_x) && (y[0] == drink_y)) {
             snake_length++;
             scores = scores + 5;
-            try        
-    {            
-    in = new FileInputStream(new File("src\\slurp.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-        System.out.println(e);          
-    }
+            try {
+                in = new FileInputStream("src\\slurp.wav");
+                //AudioStream audios = new AudioStream(in);
+                //AudioPlayer.player.start(audios);
+            }
+            catch(Exception e) { System.out.println(e.getMessage()); }
             placeDrinks();
         }
     }
 
     private void move_snake() {
-
         for (int z = snake_length; z > 0; z--) {
             x[z] = x[(z - 1)];
             y[z] = y[(z - 1)];
         }
-
         if (leftDirection) {
             x[0] -= ballSize;
         }
-
         if (rightDirection) {
             x[0] += ballSize;
         }
-
         if (upDirection) {
             y[0] -= ballSize;
         }
-
         if (downDirection) {
             y[0] += ballSize;
         }
     }
 
     private void checkCollision() {
-
         for (int z = snake_length; z > 0; z--) {
-
             if ((z > 5) && (x[0] == x[z]) && (y[0] == y[z])) {
                 inGame = false;
-                try        
-    {            
-    in = new FileInputStream(new File("src\\beep.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-                
-    }
+                try {
+                    in = new FileInputStream("src\\beep.wav");
+                    //AudioStream audios = new AudioStream(in);
+                    //AudioPlayer.player.start(audios);
+                } catch(Exception e) { System.out.println(e.getMessage()); }
             }
         }
 
         if (y[0] >= arena_height) {
             inGame = false;
-            try        
-    {            
-    in = new FileInputStream(new File("src\\beep.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-                
-    }
+            try {
+                in = new FileInputStream("src\\beep.wav");
+                //AudioStream audios = new AudioStream(in);
+                //AudioPlayer.player.start(audios);
+            } catch(Exception e) { System.out.println(e.getMessage()); }
         }
 
         if (y[0] < 0) {
             inGame = false;
-            try        
-    {            
-    in = new FileInputStream(new File("src\\beep.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-                
-    }
+            try {
+                in = new FileInputStream("src\\beep.wav");
+                //AudioStream audios = new AudioStream(in);
+                //AudioPlayer.player.start(audios);
+            }
+            catch (Exception e) { System.out.println(e.getMessage()); }
         }
 
         if (x[0] >= arena_width) {
             inGame = false;
-            try        
-    {            
-    in = new FileInputStream(new File("src\\beep.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-                
-    }
+            try {
+                in = new FileInputStream("src\\beep.wav");
+                //AudioStream audios = new AudioStream(in);
+                //AudioPlayer.player.start(audios);
+            } catch(Exception e) { System.out.println(e.getMessage()); }
         }
 
         if (x[0] < 0) {
             inGame = false;
-            try        
-    {            
-    in = new FileInputStream(new File("src\\beep.wav"));            
-    //AudioStream audios = new AudioStream(in);
-    //AudioPlayer.player.start(audios);
-    }        
-    catch(Exception e)                
-    {                    
-                
-    }
+            try {
+                in = new FileInputStream("src\\beep.wav");
+                //AudioStream audios = new AudioStream(in);
+                //AudioPlayer.player.start(audios);
+            } catch(Exception e) { System.out.println(e.getMessage()); }
         }
         
         if(!inGame) {
@@ -365,74 +312,59 @@ JFrame ex;
     }
 
     private void placeDrinks() {
-
+        int RAND_POS = 30;
         int r = (int) (Math.random() * RAND_POS);
         drink_x = ((r * ballSize));
-
         r = (int) (Math.random() * RAND_POS);
         drink_y = ((r * ballSize));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (inGame) {
-
             checkDrink();
             checkCollision();
             move_snake();
         }
-
         repaint();
     }
 
     private class TAdapter extends KeyAdapter {
-
         @Override
         public void keyPressed(KeyEvent e) {
-
             int key = e.getKeyCode();
-
             if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
                 leftDirection = true;
                 upDirection = false;
                 downDirection = false;
-                 ImageIcon kiri = new ImageIcon("src/kiri.png");
-        head = kiri.getImage();
+                ImageIcon kiri = new ImageIcon("src/kiri.png");
+                head = kiri.getImage();
             }
-
             if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
                 rightDirection = true;
                 upDirection = false;
                 downDirection = false;
-                 ImageIcon kanan = new ImageIcon("src/kanan.png");
-        head = kanan.getImage();
+                ImageIcon kanan = new ImageIcon("src/kanan.png");
+                head = kanan.getImage();
             }
-
             if ((key == KeyEvent.VK_UP) && (!downDirection)) {
                 upDirection = true;
                 rightDirection = false;
                 leftDirection = false;
-               ImageIcon atas = new ImageIcon("src/atas.png");
-        head = atas.getImage();
+                ImageIcon atas = new ImageIcon("src/atas.png");
+                head = atas.getImage();
             }
-
             if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
                 downDirection = true;
                 rightDirection = false;
                 leftDirection = false;
-                 ImageIcon bawah = new ImageIcon("src/bawah.png");
-        head = bawah.getImage();
+                ImageIcon bawah = new ImageIcon("src/bawah.png");
+                head = bawah.getImage();
             }
-            if ((key == KeyEvent.VK_P) ) {
-               
-               if(timer.isRunning()){
-                   timer.stop();                 
-               }  
-               else{
-                   timer.start();     
-               }    
-            }    
+            if (key == KeyEvent.VK_P) {
+               if(timer.isRunning()) { timer.stop();
+               } else { timer.start(); }
+            }
         }
     }
 }

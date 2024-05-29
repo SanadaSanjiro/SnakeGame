@@ -16,9 +16,7 @@ public class ClassDB {
     public static Connection getkoneksi() {
         if (koneksi==null) {
             try {
-                String url=new String();
-                String user=new String();
-                String password=new String();
+                String url, user, password;
                 url="jdbc:mysql://localhost:3306/snake";
                 user="root";
                 password="MyDatab@se22";
