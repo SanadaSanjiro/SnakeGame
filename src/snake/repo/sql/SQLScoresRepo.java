@@ -16,7 +16,7 @@ import java.util.Objects;
 public class SQLScoresRepo implements ScoresRepo {
     @Override
     public void addPlayer(String name) {
-        try (Connection connection = ClassDB.getConnection();) {
+        try (Connection connection = ClassDB.getConnection()) {
             Statement st=connection.createStatement();
             String query="Select * from score where nama = '" + name +"'";
             ResultSet r=st.executeQuery(query);
@@ -32,7 +32,7 @@ public class SQLScoresRepo implements ScoresRepo {
 
     @Override
     public void updateScores(String name, int scores) {
-        try (Connection connection = ClassDB.getConnection();) {
+        try (Connection connection = ClassDB.getConnection()) {
             Statement st = connection.createStatement();
             String query = "UPDATE score Set score ='" + scores + "' where nama = '" + name + "'";
             st.executeUpdate(query);
@@ -45,7 +45,7 @@ public class SQLScoresRepo implements ScoresRepo {
 
     @Override
     public int getTopScores() {
-        try (Connection connection = ClassDB.getConnection();) {
+        try (Connection connection = ClassDB.getConnection()) {
             String query="select max(score) as top from score;";
             ResultSet r = processQuery(query, connection);
             if (r.next()) {
@@ -63,7 +63,7 @@ public class SQLScoresRepo implements ScoresRepo {
     @Override
     public String getTopPlayer() {
         int topScore = getTopScores();
-        try (Connection connection = ClassDB.getConnection();) {
+        try (Connection connection = ClassDB.getConnection()) {
             String query="select nama from score where score = " + topScore;
             ResultSet r = processQuery(query, connection);
             if (r.next()) {
@@ -78,7 +78,7 @@ public class SQLScoresRepo implements ScoresRepo {
 
     @Override
     public int getPlayersBest(String name) {
-        try (Connection connection = ClassDB.getConnection();) {
+        try (Connection connection = ClassDB.getConnection()) {
             String query="Select * from score where nama = '" + name +"'";
             ResultSet r = processQuery(query, connection);
             if (!r.next()) {
