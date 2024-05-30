@@ -20,13 +20,13 @@ public interface ScoresRepo {
 
     /**
      * Returns the best scores among all players
-     * @return Top scores
+     * @return Top scores. If there is no players with scores in repository this method should return 0.
      */
     int getTopScores();
 
     /**
      * Returns the top player with the most points
-     * @return The name of the top player (String)
+     * @return The name of the top player (String). If there is no such player this method should return null
      */
     String getTopPlayer();
 

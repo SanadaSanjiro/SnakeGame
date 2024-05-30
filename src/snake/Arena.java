@@ -11,6 +11,7 @@ package snake;
  * @author NDIAPPINK
  */
 
+import snake.repo.memory.RAMScoresRepo;
 import snake.repo.sql.SQLScoresRepo;
 
 import java.awt.Color;
@@ -57,7 +58,8 @@ InputStream in;
     private final ScoresRepo repo;
 
     public Arena() {
-        repo = new SQLScoresRepo();
+        // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
+        repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
         name();
         addKeyListener(new TAdapter());
         setBackground(Color.black);
