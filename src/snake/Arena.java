@@ -11,7 +11,8 @@ package snake;
  * @author NDIAPPINK
  */
 
-import cls.ClassDB;
+import snake.repo.sql.SQLScoresRepo;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,9 +26,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.util.Objects;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -55,8 +54,10 @@ InputStream in;
     private Image ball;
     private Image drink;
     private Image head;
+    private final ScoresRepo repo;
 
     public Arena() {
+        repo = new SQLScoresRepo();
         name();
         addKeyListener(new TAdapter());
         setBackground(Color.black);
@@ -68,33 +69,8 @@ InputStream in;
 
     private void name() {
         name = JOptionPane.showInputDialog(this, "Please Input Your Name:");
-        if (name == null) {
-            name = "Player1";
-            //System.exit(0);
-        } else {
-            if (name.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,"Name Already Exist!");
-                name();
-            } else {
-                try
-                {
-                    Connection c=ClassDB.getkoneksi();
-                    Statement st=c.createStatement();
-                    String nameCheckQuery="Select * from score where nama = '" + name +"'";
-                    ResultSet r=st.executeQuery(nameCheckQuery);
-                    if (!r.next())
-                    {
-                        try
-                        {
-                            st.executeUpdate("Insert into score(nama) values('" + name + "')");
-                        } catch(Exception e) {
-                            System.out.println(e.getMessage());
-                        }
-                    }
-                } catch(Exception e) { System.out.println(e.getMessage()); }
-            }
-        }
+        if (name == null || name.isEmpty()) { name = "Player1"; }
+        repo.addPlayer(name);
     }
 
     private void loadImages() {
@@ -110,61 +86,30 @@ InputStream in;
     }
 
     private void initGame() {
-
         snake_length = 5;
-
         for (int z = 0; z < snake_length; z++) {
             x[z] = arena_width /20;
             y[z] = arena_height /2;
         }
-
         placeDrinks();
-
         int DELAY = 200;
         timer = new Timer(DELAY, this);
         timer.start();
     }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         doDrawing(g);
     }
+
     private void updateScores() {
-         try {
-            Connection c=ClassDB.getkoneksi();
-            Statement s=c.createStatement();
-            String sqel = "UPDATE score Set score ='" + scores +"' where nama = '" + name + "'";
-            s.executeUpdate(sqel);
-            /*
-            String cektinggi="Select * from score where nama = '" + name.toString() +"'";
-            ResultSet r=s.executeQuery(cektinggi);
-            boolean isResult = r.next();
-            if (isResult)
-            {
-                String topName = r.getString("nama");
-                System.out.println(topName);
-                String topScores = r.getString("score");
-                System.out.println(topScores);
-                highestScore = Integer.parseInt(topScores);
-                if (scores <= highestScore) {return;}
-                else
-                {
-                    String sqel = "UPDATE score Set score ='" + scores +"' where nama = '" + name.toString()+ "'";
-                    s.executeUpdate(sqel);
-                }
-             */
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-        }
+        repo.updateScores(name, scores);
     }
 
     private void doDrawing(Graphics g) {
-        
         if (inGame) {
-
             g.drawImage(drink, drink_x, drink_y, this);
-
             for (int z = 0; z < snake_length; z++) {
                 if (z == 0) {
                     g.drawImage(head, x[z], y[z], this);
@@ -175,34 +120,27 @@ InputStream in;
 
             Toolkit.getDefaultToolkit().sync();
             String msg = "Score = " + scores;
-             
-        Font small = new Font("Helvetica", Font.BOLD, 10);
-        FontMetrics metr = getFontMetrics(small);
+            Font small = new Font("Helvetica", Font.BOLD, 10);
+            FontMetrics metr = getFontMetrics(small);
 
-        g.setColor(Color.white);
-        g.setFont(small);
-        g.drawString(msg, 5, arena_height - (arena_height -10));
+            g.setColor(Color.white);
+            g.setFont(small);
+            g.drawString(msg, 5, arena_height - (arena_height -10));
         
-        try {            
-            Connection c=ClassDB.getkoneksi();
-            Statement s= c.createStatement();
-            String sql="Select * from score where score = (select max(score) from score)";
-            ResultSet r=s.executeQuery(sql);
-            if (r.next()){
-                highscore = Integer.parseInt(r.getString("score"));
-                String scr = "Biggest Score "+r.getString("nama")+" = "+highscore;
-                g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
+            highscore = repo.getTopScores();
+            String topName = repo.getTopPlayer();
+            String scr;
+            if (Objects.nonNull(topName)) {
+                scr = "Biggest Score " + topName + " = " + highscore;
+            } else {
+                scr = "Biggest Score  = 0" + highscore;
             }
-            else {
-                String scr = "Biggest Score = 0";
-               g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
-            }
-            r.close();
-            s.close();
-            } catch(Exception e) { System.out.println(e.getMessage()); }
-        } else { gameOver(g);}
+            g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
+        } else { gameOver(g); }
     }
+
     private void gameOver(Graphics g) {
+
         updateScores();
         if (scores <= highscore) {
             String msg = "Your Score: = "+ scores;
