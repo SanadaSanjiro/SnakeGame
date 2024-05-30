@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="USE_RELEASE_OPTION" value="false" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Snake Game In Java Source Code" options="--add-exports java.desktop/com.sun.media.sound=ALL-UNNAMED --add-exports java.desktop/sun.awt.im=ALL-UNNAMED" />
+    </option>
+  </component>
+</project>

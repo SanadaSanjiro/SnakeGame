@@ -276,6 +276,9 @@ InputStream in;
         }
     }
 
+    /**
+     * Makes some sound and stops the game
+     */
     private void breakAndBeep() {
         inGame = false;
         try {
