@@ -27,7 +27,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -57,6 +61,26 @@ InputStream in;
     private Image head;
     private final ScoresRepo repo;
 
+    enum Direction {
+        LEFT (KeyEvent.VK_LEFT),
+        RIGHT (KeyEvent.VK_RIGHT),
+        UP (KeyEvent.VK_UP),
+        DOWN (KeyEvent.VK_DOWN);
+
+        Direction(int key) {
+            this.key = key;
+        }
+        private final int key;
+        private static final Map<Integer, Direction> keyToEnum = Stream.of(values())
+                .collect(Collectors.toMap(Direction::getKey, e->e));
+        public int getKey() {
+            return key;
+        }
+        static Optional<Direction> fromKey(int key) {
+            return Optional.ofNullable(keyToEnum.get(key));
+        }
+    }
+
     public Arena() {
         // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
         repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
@@ -69,6 +93,10 @@ InputStream in;
         initGame();
     }
 
+    /**
+     * Shows "Enter your name" dialog window.
+     * If the name is blank sets the default name = Player1
+     */
     private void name() {
         name = JOptionPane.showInputDialog(this, "Please Input Your Name:");
         if (name == null || name.isEmpty()) { name = "Player1"; }
