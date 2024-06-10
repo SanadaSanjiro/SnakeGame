@@ -12,7 +12,6 @@ package snake;
  */
 
 import snake.repo.memory.RAMScoresRepo;
-import snake.repo.sql.SQLScoresRepo;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -49,10 +48,12 @@ InputStream in;
     private int snake_length;
     private int drink_x;
     private int drink_y;
+    /*
     private boolean leftDirection = false;
     private boolean rightDirection = true;
     private boolean upDirection = false;
     private boolean downDirection = false;
+     */
     private boolean inGame = true;
     String name ="";
     private Timer timer;
@@ -60,30 +61,84 @@ InputStream in;
     private Image drink;
     private Image head;
     private final ScoresRepo repo;
+    private Direction direction;
 
     enum Direction {
-        LEFT (KeyEvent.VK_LEFT),
-        RIGHT (KeyEvent.VK_RIGHT),
-        UP (KeyEvent.VK_UP),
-        DOWN (KeyEvent.VK_DOWN);
+        LEFT (KeyEvent.VK_LEFT, new ImageIcon("src/kiri.png")) {
+            @Override
+            void move(int[] x, int[] y, int ballSize) {
+                stepBody(x, y);
+                x[0] -= ballSize;
+            }
+        },
+        RIGHT (KeyEvent.VK_RIGHT, new ImageIcon("src/kanan.png")) {
+            @Override
+            void move(int[] x, int[] y, int ballSize) {
+                stepBody(x, y);
+                x[0] += ballSize;
+            }
+        },
+        UP (KeyEvent.VK_UP, new ImageIcon("src/atas.png")) {
+            @Override
+            void move(int[] x, int[] y, int ballSize) {
+                stepBody(x, y);
+                y[0] -= ballSize;
+            }
+        },
+        DOWN (KeyEvent.VK_DOWN, new ImageIcon("src/bawah.png")) {
+            @Override
+            void move(int[] x, int[] y, int ballSize) {
+                stepBody(x, y);
+                y[0] += ballSize;
+            }
+        };
 
-        Direction(int key) {
+        Direction(int key, ImageIcon head) {
             this.key = key;
+            this.head = head;
         }
         private final int key;
+        private final ImageIcon head;
         private static final Map<Integer, Direction> keyToEnum = Stream.of(values())
                 .collect(Collectors.toMap(Direction::getKey, e->e));
         public int getKey() {
             return key;
         }
+
+        /**
+         *
+         * @param key
+         * @return
+         */
         static Optional<Direction> fromKey(int key) {
             return Optional.ofNullable(keyToEnum.get(key));
+        }
+
+        /**
+         * Moves the snake one step.
+         * @param x Array of X coordinates of snake parts. Must be the same length as the Y coordinate array.
+         * @param y Array of Y coordinates of snake parts. Must be the same length as the X coordinates array.
+         * @param ballSize the size of one segment of a snake
+         */
+        abstract void move(int[] x, int[] y, int ballSize);
+
+        /**
+         * Moves the snakes body one step.
+         * @param x Array of X coordinates of snake parts. Must be the same length as the Y coordinate array.
+         * @param y Array of Y coordinates of snake parts. Must be the same length as the X coordinates array.
+         */
+        private static void stepBody(int[] x, int[] y) {
+            for (int l = x.length-1; l > 0; l--) {
+                x[l] = x[(l - 1)];
+                y[l] = y[(l - 1)];
+            }
         }
     }
 
     public Arena() {
         // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
         repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
+        direction = Direction.RIGHT;
         name();
         addKeyListener(new TAdapter());
         setBackground(Color.black);
@@ -170,7 +225,6 @@ InputStream in;
     }
 
     private void gameOver(Graphics g) {
-
         updateScores();
         if (scores <= highscore) {
             String msg = "Your Score: = "+ scores;
@@ -207,22 +261,7 @@ InputStream in;
     }
 
     private void move_snake() {
-        for (int z = snake_length; z > 0; z--) {
-            x[z] = x[(z - 1)];
-            y[z] = y[(z - 1)];
-        }
-        if (leftDirection) {
-            x[0] -= ballSize;
-        }
-        if (rightDirection) {
-            x[0] += ballSize;
-        }
-        if (upDirection) {
-            y[0] -= ballSize;
-        }
-        if (downDirection) {
-            y[0] += ballSize;
-        }
+        direction.move(x, y, ballSize);
     }
 
     /**
@@ -278,33 +317,10 @@ InputStream in;
         @Override
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
-            if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
-                leftDirection = true;
-                upDirection = false;
-                downDirection = false;
-                ImageIcon kiri = new ImageIcon("src/kiri.png");
-                head = kiri.getImage();
-            }
-            if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
-                rightDirection = true;
-                upDirection = false;
-                downDirection = false;
-                ImageIcon kanan = new ImageIcon("src/kanan.png");
-                head = kanan.getImage();
-            }
-            if ((key == KeyEvent.VK_UP) && (!downDirection)) {
-                upDirection = true;
-                rightDirection = false;
-                leftDirection = false;
-                ImageIcon atas = new ImageIcon("src/atas.png");
-                head = atas.getImage();
-            }
-            if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
-                downDirection = true;
-                rightDirection = false;
-                leftDirection = false;
-                ImageIcon bawah = new ImageIcon("src/bawah.png");
-                head = bawah.getImage();
+            Optional<Direction> newDirection =  Direction.fromKey(key);
+            if (newDirection.isPresent()) {
+                direction = newDirection.get();
+                head = direction.head.getImage();
             }
             if (key == KeyEvent.VK_P) {
                if(timer.isRunning()) { timer.stop();
