@@ -11,6 +11,7 @@ package snake;
  * @author NDIAPPINK
  */
 
+import snake.audio.WaveAudioPlayer;
 import snake.repo.memory.RAMScoresRepo;
 
 import java.awt.Color;
@@ -24,8 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.File;
 import java.util.Objects;
 import java.util.Optional;
 import javax.swing.ImageIcon;
@@ -34,7 +34,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Arena extends JPanel implements ActionListener {
-InputStream in;
     private final int arena_width = 400;
     private final int arena_height = 400;
     private final int ballSize = 10;
@@ -53,6 +52,9 @@ InputStream in;
     private Image head;
     private final ScoresRepo repo;
     private Direction direction;
+    private final SoundPlayer soundPlayer = WaveAudioPlayer.getPlayer();
+    private final File slurp = new File("resources\\slurp.wav");
+    private final File beep = new File("resources\\beep.wav");
 
     public Arena() {
         // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
@@ -78,15 +80,9 @@ InputStream in;
     }
 
     private void loadImages() {
-
-        ImageIcon iid = new ImageIcon("src/dot.png");
-        ball = iid.getImage();
-
-        ImageIcon iia = new ImageIcon("src/minum.png");
-        drink = iia.getImage();
-
-        ImageIcon iih = new ImageIcon("src/kanan.png");
-        head = iih.getImage();
+        ball = new ImageIcon("resources/dot.png").getImage();
+        drink = new ImageIcon("resources/minum.png").getImage();
+        head = new ImageIcon("resources/kanan.png").getImage();
     }
 
     private void initGame() {
@@ -145,36 +141,26 @@ InputStream in;
 
     private void gameOver(Graphics g) {
         updateScores();
+        String msg;
+        Font small = new Font("Helvetica", Font.BOLD, 14);
+        FontMetrics metr = getFontMetrics(small);
         if (scores <= highscore) {
-            String msg = "Your Score: = "+ scores;
-            Font small = new Font("Helvetica", Font.BOLD, 14);
-            FontMetrics metr = getFontMetrics(small);
-
+            msg = "Your Score: = " + scores;
             g.setColor(Color.white);
-            g.setFont(small);
-         g.drawString(msg, (arena_width - metr.stringWidth(msg)) / 2, arena_height / 2);
         }
         else {
-            String msgg = "Congratulation High Score = "+ scores;
-            Font small = new Font("Helvetica", Font.BOLD, 14);
-            FontMetrics metr = getFontMetrics(small);
-
+            msg = "Congratulation High Score = " + scores;
             g.setColor(Color.blue);
-            g.setFont(small);
-            g.drawString(msgg, (arena_width - metr.stringWidth(msgg)) / 2, arena_height / 2);
         }
+        g.setFont(small);
+        g.drawString(msg, (arena_width - metr.stringWidth(msg)) / 2, arena_height / 2);
     }
     
     private void checkDrink() {
         if ((x[0] == drink_x) && (y[0] == drink_y)) {
             snake_length++;
             scores = scores + 5;
-            try {
-                in = new FileInputStream("src\\slurp.wav");
-                //AudioStream audios = new AudioStream(in);
-                //AudioPlayer.player.start(audios);
-            }
-            catch(Exception e) { System.out.println(e.getMessage()); }
+            soundPlayer.playWave(slurp);
             placeDrinks();
         }
     }
@@ -206,12 +192,8 @@ InputStream in;
      * Makes some sound and stops the game
      */
     private void breakAndBeep() {
+        soundPlayer.playWave(beep);
         inGame = false;
-        try {
-            in = new FileInputStream("src\\beep.wav");
-            //AudioStream audios = new AudioStream(in);
-            //AudioPlayer.player.start(audios);
-        } catch(Exception e) { System.out.println(e.getMessage()); }
     }
 
     private void placeDrinks() {
@@ -241,7 +223,7 @@ InputStream in;
                 direction = newDirection.get();
                 head = direction.getImage();
             }
-            if (key == KeyEvent.VK_P) {
+            if (key == KeyEvent.VK_P) {  // Pause the game by P pressed
                if(timer.isRunning()) { timer.stop();
                } else { timer.start(); }
             }

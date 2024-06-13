@@ -13,28 +13,28 @@ import java.util.stream.Stream;
  * and also associates the direction of movement with key codes and images of the snake's head
  */
 public enum Direction {
-    LEFT (KeyEvent.VK_LEFT, new ImageIcon("src/kiri.png")) {
+    LEFT (KeyEvent.VK_LEFT, new ImageIcon("resources/kiri.png")) {
         @Override
         void move(int[] x, int[] y, int ballSize) {
             stepBody(x, y);
             x[0] -= ballSize;
         }
     },
-    RIGHT (KeyEvent.VK_RIGHT, new ImageIcon("src/kanan.png")) {
+    RIGHT (KeyEvent.VK_RIGHT, new ImageIcon("resources/kanan.png")) {
         @Override
         void move(int[] x, int[] y, int ballSize) {
             stepBody(x, y);
             x[0] += ballSize;
         }
     },
-    UP (KeyEvent.VK_UP, new ImageIcon("src/atas.png")) {
+    UP (KeyEvent.VK_UP, new ImageIcon("resources/atas.png")) {
         @Override
         void move(int[] x, int[] y, int ballSize) {
             stepBody(x, y);
             y[0] -= ballSize;
         }
     },
-    DOWN (KeyEvent.VK_DOWN, new ImageIcon("src/bawah.png")) {
+    DOWN (KeyEvent.VK_DOWN, new ImageIcon("resources/bawah.png")) {
         @Override
         void move(int[] x, int[] y, int ballSize) {
             stepBody(x, y);
