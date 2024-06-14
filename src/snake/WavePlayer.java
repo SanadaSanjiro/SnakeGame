@@ -6,6 +6,9 @@ import java.io.File;
  * Abstraction able to play wave files.
  */
 
-public interface SoundPlayer {
+/**
+ * waveFile should be proper sound file in .wav format
+ */
+public interface WavePlayer {
     void playWave(File waveFile);
 }

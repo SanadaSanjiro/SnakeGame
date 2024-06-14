@@ -1,28 +1,27 @@
 package snake.audio;
 
-import snake.SoundPlayer;
+import snake.WavePlayer;
 
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Implementation of the SoundPlayer interface. Starts a new thread to play a wave file.
  */
 
-public class WaveAudioPlayer implements Runnable, SoundPlayer {
-    private final static ExecutorService es = Executors.newSingleThreadExecutor();
-    private final static WaveAudioPlayer player = new WaveAudioPlayer();
+public class WaveAudioPlayer implements Runnable, WavePlayer {
+    private final static ExecutorService es = ExecutorServiceProvider.getExecutorService();
+    private final static WavePlayer player = new WaveAudioPlayer();
     private File waveFile = null;
 
     /**
      *  SoundPlayer factory
      * @return WaveAudioPlayer singleton
      */
-    public static SoundPlayer getPlayer() {
+    public static WavePlayer getPlayer() {
         return player;
     }
 

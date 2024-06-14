@@ -11,6 +11,7 @@ package snake;
  * @author NDIAPPINK
  */
 
+import snake.audio.MidiAudioPlayer;
 import snake.audio.WaveAudioPlayer;
 import snake.repo.memory.RAMScoresRepo;
 
@@ -47,14 +48,16 @@ public class Arena extends JPanel implements ActionListener {
     private boolean inGame = true;
     String name ="";
     private Timer timer;
-    private Image ball;
-    private Image drink;
-    private Image head;
+    private final Image ball = new ImageIcon("resources\\img\\dot.png").getImage();
+    private final Image drink = new ImageIcon("resources\\img\\minum.png").getImage();
+    private Image head = new ImageIcon("resources\\img\\kanan.png").getImage();
     private final ScoresRepo repo;
     private Direction direction;
-    private final SoundPlayer soundPlayer = WaveAudioPlayer.getPlayer();
-    private final File slurp = new File("resources\\slurp.wav");
-    private final File beep = new File("resources\\beep.wav");
+
+    private final WavePlayer wavePlayer = WaveAudioPlayer.getPlayer();
+    private final File slurp = new File("resources\\wav\\slurp.wav");
+    private final File beep = new File("resources\\wav\\beep.wav");
+    private final MidiPlayer midiPlayer = MidiAudioPlayer.getPlayer();
 
     public Arena() {
         // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
@@ -65,8 +68,9 @@ public class Arena extends JPanel implements ActionListener {
         setBackground(Color.black);
         setFocusable(true);
         setPreferredSize(new Dimension(arena_width, arena_height));
-        loadImages();
         initGame();
+        File backgroundMusic = new File("resources\\midi\\lemon.mid");
+        midiPlayer.playMidi(backgroundMusic);
     }
 
     /**
@@ -77,12 +81,6 @@ public class Arena extends JPanel implements ActionListener {
         name = JOptionPane.showInputDialog(this, "Please Input Your Name:");
         if (name == null || name.isEmpty()) { name = "Player1"; }
         repo.addPlayer(name);
-    }
-
-    private void loadImages() {
-        ball = new ImageIcon("resources/dot.png").getImage();
-        drink = new ImageIcon("resources/minum.png").getImage();
-        head = new ImageIcon("resources/kanan.png").getImage();
     }
 
     private void initGame() {
@@ -160,7 +158,7 @@ public class Arena extends JPanel implements ActionListener {
         if ((x[0] == drink_x) && (y[0] == drink_y)) {
             snake_length++;
             scores = scores + 5;
-            soundPlayer.playWave(slurp);
+            wavePlayer.playWave(slurp);
             placeDrinks();
         }
     }
@@ -192,7 +190,8 @@ public class Arena extends JPanel implements ActionListener {
      * Makes some sound and stops the game
      */
     private void breakAndBeep() {
-        soundPlayer.playWave(beep);
+        midiPlayer.stop();
+        wavePlayer.playWave(beep);
         inGame = false;
     }
 
