@@ -13,25 +13,16 @@ package snake;
 
 import snake.audio.MidiAudioPlayer;
 import snake.audio.WaveAudioPlayer;
+import snake.credits.CreditsRunner;
 import snake.repo.memory.RAMScoresRepo;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
-import java.util.Objects;
-import java.util.Optional;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.swing.*;
 import javax.swing.Timer;
 
 public class Arena extends JPanel implements ActionListener {
@@ -39,38 +30,40 @@ public class Arena extends JPanel implements ActionListener {
     private final int arena_height = 400;
     private final int ballSize = 10;
     private final int ALL_DOTS = 1000;
-    private int scores, highscore = 0;
+    private int scores, highScore;
     private final int[] x = new int[ALL_DOTS];
     private final int[] y = new int[ALL_DOTS];
     private int snake_length;
     private int drink_x;
     private int drink_y;
-    private boolean inGame = true;
+    private boolean inGame;
     String name ="";
     private Timer timer;
     private final Image ball = new ImageIcon("resources\\img\\dot.png").getImage();
     private final Image drink = new ImageIcon("resources\\img\\minum.png").getImage();
-    private Image head = new ImageIcon("resources\\img\\kanan.png").getImage();
+    private Image head;
     private final ScoresRepo repo;
     private Direction direction;
+    private final CreditsRunner creditsRunner;
 
     private final WavePlayer wavePlayer = WaveAudioPlayer.getPlayer();
     private final File slurp = new File("resources\\wav\\slurp.wav");
     private final File beep = new File("resources\\wav\\beep.wav");
     private final MidiPlayer midiPlayer = MidiAudioPlayer.getPlayer();
+    //private boolean isOver;
+    private final KeyListener keyListener;
 
     public Arena() {
         // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
         repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
-        direction = Direction.RIGHT;
-        name();
-        addKeyListener(new TAdapter());
+        keyListener = new TAdapter();
+        addKeyListener(keyListener);
         setBackground(Color.black);
         setFocusable(true);
         setPreferredSize(new Dimension(arena_width, arena_height));
+        creditsRunner = new CreditsRunner();
+        this.add(creditsRunner);
         initGame();
-        File backgroundMusic = new File("resources\\midi\\lemon.mid");
-        midiPlayer.playMidi(backgroundMusic);
     }
 
     /**
@@ -84,12 +77,21 @@ public class Arena extends JPanel implements ActionListener {
     }
 
     private void initGame() {
+        inGame = true;
+        creditsRunner.setVisible(false);
+        scores = 0;
+        highScore = repo.getTopScores();
+        name();
+        direction = Direction.RIGHT;
+        head= direction.getImage();
         snake_length = 5;
         for (int z = 0; z < snake_length; z++) {
             x[z] = arena_width /20;
             y[z] = arena_height /2;
         }
         placeDrinks();
+        File backgroundMusic = new File("resources\\midi\\lemon.mid");
+        midiPlayer.playMidi(backgroundMusic);
         int DELAY = 200;
         timer = new Timer(DELAY, this);
         timer.start();
@@ -125,13 +127,12 @@ public class Arena extends JPanel implements ActionListener {
             g.setFont(small);
             g.drawString(msg, 5, arena_height - (arena_height -10));
         
-            highscore = repo.getTopScores();
             String topName = repo.getTopPlayer();
             String scr;
             if (Objects.nonNull(topName)) {
-                scr = "Biggest Score " + topName + " = " + highscore;
+                scr = "Biggest Score " + topName + " = " + highScore;
             } else {
-                scr = "Biggest Score  = 0" + highscore;
+                scr = "Biggest Score  = 0" + highScore;
             }
             g.drawString(scr, (arena_width - metr.stringWidth(scr)) -10, arena_height -5);
         } else { gameOver(g); }
@@ -139,10 +140,12 @@ public class Arena extends JPanel implements ActionListener {
 
     private void gameOver(Graphics g) {
         updateScores();
+        scrollScores(g);
+    }
+
+    private void scrollScores(Graphics g) {
         String msg;
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
-        if (scores <= highscore) {
+        if (scores <= highScore) {
             msg = "Your Score: = " + scores;
             g.setColor(Color.white);
         }
@@ -150,8 +153,20 @@ public class Arena extends JPanel implements ActionListener {
             msg = "Congratulation High Score = " + scores;
             g.setColor(Color.blue);
         }
-        g.setFont(small);
-        g.drawString(msg, (arena_width - metr.stringWidth(msg)) / 2, arena_height / 2);
+        creditsRunner.setHeader(msg);
+        creditsRunner.setFooter("Play again (y/n)?");
+        List<String> scores = repo.getAllScores()
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .map(e -> e.getKey() + ": " + e.getValue())
+                .collect(Collectors.toList());
+        scores.add(0, "");
+        scores.add(0, "======================================");
+        scores.add(0, "Top scores");
+        scores.add(0, "======================================");
+        creditsRunner.setCredits(scores);
+        creditsRunner.setVisible(true);
     }
     
     private void checkDrink() {
@@ -217,14 +232,26 @@ public class Arena extends JPanel implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
-            Optional<Direction> newDirection =  Direction.fromKey(key);
-            if (newDirection.isPresent()) {
-                direction = newDirection.get();
-                head = direction.getImage();
-            }
-            if (key == KeyEvent.VK_P) {  // Pause the game by P pressed
-               if(timer.isRunning()) { timer.stop();
-               } else { timer.start(); }
+            if (inGame) {
+                Optional<Direction> newDirection = Direction.fromKey(key);
+                if (newDirection.isPresent()) {
+                    direction = newDirection.get();
+                    head = direction.getImage();
+                }
+                if (key == KeyEvent.VK_P) {  // Pause the game by P pressed
+                    if (timer.isRunning()) {
+                        timer.stop();
+                    } else {
+                        timer.start();
+                    }
+                }
+            } else {
+                if (key == KeyEvent.VK_Y) {
+                    initGame();
+                }
+                if (key == KeyEvent.VK_N) {
+                    System.exit(0);
+                }
             }
         }
     }

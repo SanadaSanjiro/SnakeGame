@@ -132,7 +132,7 @@ public class Splash extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         this.dispose();
-        JFrame ex = new Ular();
+        JFrame ex = new SnakeStarter();
         ex.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 

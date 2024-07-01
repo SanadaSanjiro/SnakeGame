@@ -10,12 +10,12 @@ package snake;
  *
  * @author NDIAPPINK
  */
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-public class Ular extends JFrame{
-    public Ular() {
+import javax.swing.*;
+import java.awt.*;
 
-        add(new Arena());    
+public class SnakeStarter extends JFrame{
+    public SnakeStarter() {
+        add(new Arena());
         setResizable(false);
         pack();
         setTitle("Snake");

@@ -14,7 +14,7 @@ public class MidiAudioPlayer implements Runnable, MidiPlayer {
     private final static ExecutorService es = ExecutorServiceProvider.getExecutorService();
     private final static MidiPlayer player = new MidiAudioPlayer();
     private File midiFile = null;
-    private boolean keepPlay = true;
+    private boolean keepPlay;
 
     public static MidiPlayer getPlayer() {
         return player;
@@ -58,6 +58,7 @@ public class MidiAudioPlayer implements Runnable, MidiPlayer {
     @Override
     public void playMidi(File midiFile) {
         synchronized (this) {
+            keepPlay = true;
             this.midiFile = midiFile;
         }
     }

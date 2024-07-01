@@ -1,5 +1,8 @@
 package snake;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Describes an abstract storage for player names and their best scores.
  */
@@ -36,4 +39,10 @@ public interface ScoresRepo {
      * @return player's best scores
      */
     int getPlayersBest(String name);
+
+    /**
+     * Provides a list of all players with their best scores
+     * @return list of a Player objects
+     */
+    Map<String, Integer> getAllScores();
 }

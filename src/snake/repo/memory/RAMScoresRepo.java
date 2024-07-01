@@ -2,13 +2,10 @@ package snake.repo.memory;
 
 import snake.ScoresRepo;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class RAMScoresRepo implements ScoresRepo {
-    Map<String, Integer> map = new HashMap<>();
+    private final Map<String, Integer> map = new HashMap<>();
     @Override
     public void addPlayer(String name) {
         map.putIfAbsent(name, 0);
@@ -40,5 +37,10 @@ public class RAMScoresRepo implements ScoresRepo {
     @Override
     public int getPlayersBest(String name) {
         return map.get(name);
+    }
+
+    @Override
+    public Map<String, Integer> getAllScores() {
+        return Map.copyOf(map);
     }
 }
