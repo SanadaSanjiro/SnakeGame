@@ -15,7 +15,7 @@ class StaticTextPanel extends JPanel {
     private Font font;
     private FontMetrics fontMetrics;
 
-    public StaticTextPanel(String msg, Font font) {
+    StaticTextPanel(String msg, Font font) {
         this.msg = msg;
         this.font = font;
         fontMetrics = getFontMetrics(font);
@@ -35,16 +35,17 @@ class StaticTextPanel extends JPanel {
         Toolkit.getDefaultToolkit().sync();
         g.setColor(Color.white);
         g.setFont(font);
+        // places text in the center of the panel
         int textPositionX = (this.getWidth() - fontMetrics.stringWidth(msg))/2;
         int textPositionY = (this.getHeight() + font.getSize())/2;
         g.drawString(msg, textPositionX, textPositionY);
     }
 
     /**
-     * Changes the static text of the panel
+     * Changes the text of the panel
      * @param msg Text to display. Shouldn't be too long to fit the panel
      */
-    public void setMsg(String msg) {
+    void setMsg(String msg) {
         this.msg = msg;
     }
 
@@ -69,7 +70,7 @@ class RunningTextPanel extends JPanel {
     private FontMetrics fontMetrics;
     private int ofset;
 
-    public RunningTextPanel(Collection<String> strings, Font font) {
+    RunningTextPanel(Collection<String> strings, Font font) {
         this.strings = strings;
         this.font = font;
         fontMetrics = getFontMetrics(font);
@@ -85,7 +86,7 @@ class RunningTextPanel extends JPanel {
     /**
      * Moves text one step up.
      */
-    public void move() {
+    void move() {
         synchronized (this) {
             if (ofset > -strings.size()*font.getSize()) {
                 ofset--;
@@ -126,7 +127,7 @@ class RunningTextPanel extends JPanel {
      * Changes text of running credits
      * @param message Text lines shouldn't be too long to fit the panel
      */
-    public void setMsg(Collection<String> message) {
+    void setMsg(Collection<String> message) {
         this.strings = message;
         initShift();
     }

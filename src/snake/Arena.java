@@ -15,6 +15,7 @@ import snake.audio.MidiAudioPlayer;
 import snake.audio.WaveAudioPlayer;
 import snake.credits.CreditsRunner;
 import snake.repo.memory.RAMScoresRepo;
+import snake.repo.sql.SQLScoresRepo;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -50,13 +51,12 @@ public class Arena extends JPanel implements ActionListener {
     private final File slurp = new File("resources\\wav\\slurp.wav");
     private final File beep = new File("resources\\wav\\beep.wav");
     private final MidiPlayer midiPlayer = MidiAudioPlayer.getPlayer();
-    //private boolean isOver;
-    private final KeyListener keyListener;
 
     public Arena() {
-        // repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
-        repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
-        keyListener = new TAdapter();
+        repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
+        //repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
+        //private boolean isOver;
+        KeyListener keyListener = new TAdapter();
         addKeyListener(keyListener);
         setBackground(Color.black);
         setFocusable(true);
@@ -90,6 +90,7 @@ public class Arena extends JPanel implements ActionListener {
             y[z] = arena_height /2;
         }
         placeDrinks();
+        midiPlayer.stop();
         File backgroundMusic = new File("resources\\midi\\lemon.mid");
         midiPlayer.playMidi(backgroundMusic);
         int DELAY = 200;
@@ -104,7 +105,9 @@ public class Arena extends JPanel implements ActionListener {
     }
 
     private void updateScores() {
-        repo.updateScores(name, scores);
+        if (repo.getPlayersBest(name)<scores) {
+            repo.updateScores(name, scores);
+        }
     }
 
     private void doDrawing(Graphics g) {
@@ -140,6 +143,8 @@ public class Arena extends JPanel implements ActionListener {
 
     private void gameOver(Graphics g) {
         updateScores();
+        File creditsMusic = new File("resources\\midi\\magnetic.mid");
+        midiPlayer.playMidi(creditsMusic);
         scrollScores(g);
     }
 
@@ -155,6 +160,11 @@ public class Arena extends JPanel implements ActionListener {
         }
         creditsRunner.setHeader(msg);
         creditsRunner.setFooter("Play again (y/n)?");
+        creditsRunner.setCredits(getScoresList());
+        creditsRunner.setVisible(true);
+    }
+
+    private List<String> getScoresList() {
         List<String> scores = repo.getAllScores()
                 .entrySet()
                 .stream()
@@ -165,8 +175,7 @@ public class Arena extends JPanel implements ActionListener {
         scores.add(0, "======================================");
         scores.add(0, "Top scores");
         scores.add(0, "======================================");
-        creditsRunner.setCredits(scores);
-        creditsRunner.setVisible(true);
+        return scores;
     }
     
     private void checkDrink() {
@@ -205,8 +214,8 @@ public class Arena extends JPanel implements ActionListener {
      * Makes some sound and stops the game
      */
     private void breakAndBeep() {
-        midiPlayer.stop();
         wavePlayer.playWave(beep);
+        midiPlayer.stop();
         inGame = false;
     }
 

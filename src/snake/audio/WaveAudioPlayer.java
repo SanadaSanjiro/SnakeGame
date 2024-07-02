@@ -51,7 +51,7 @@ public class WaveAudioPlayer implements Runnable, WavePlayer {
                          UnsupportedAudioFileException |
                          LineUnavailableException |
                          InterruptedException exc) {
-                    System.out.println(exc.getMessage());
+                    System.err.println(exc.getMessage());
                 }
             }
         }
