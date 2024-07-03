@@ -1,6 +1,6 @@
 package snake.repo.sql;
 
-import snake.ScoresRepo;
+import snake.repo.ScoresRepo;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Score repository that implemented by using database.
- * Database connection provided by ClassDB class.
+ * Implementation of the ScoresRepo interface that stores players' scores in a database.
+ * The connection to the database is provided by the ClassDB class.
  */
 
 public class SQLScoresRepo implements ScoresRepo {

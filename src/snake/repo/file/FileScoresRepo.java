@@ -1,30 +1,42 @@
-package snake.repo.memory;
+package snake.repo.file;
 
 import snake.repo.ScoresRepo;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * Implementation of the ScoresRepo interface, which stores players' scores in the computer's memory.
+ * Implementation of the ScoresRepo interface that stores players' scores in a file using serialization
  */
+public class FileScoresRepo implements ScoresRepo {
+    private final Map<String, Integer> map;
 
-public class RAMScoresRepo implements ScoresRepo {
-    private final Map<String, Integer> map = new HashMap<>();
+    public FileScoresRepo() {
+        if (MapSerialaizer.mapFileExists()) {
+            map = MapSerialaizer.deserialize();
+        } else {
+            map = new HashMap<>();
+        }
+    }
     @Override
     public void addPlayer(String name) {
         map.putIfAbsent(name, 0);
+        MapSerialaizer.serialize(map);
     }
 
     @Override
     public void updateScores(String name, int scores) {
         map.put(name, scores);
+        MapSerialaizer.serialize(map);
     }
 
     @Override
     public int getTopScores() {
         Optional<Map.Entry<String, Integer>> optional =  map.entrySet()
                 .stream()
-                .max(Comparator.comparing(Map.Entry::getValue));
+                .max(Map.Entry.comparingByValue());
         if (optional.isPresent()) { return optional.get().getValue(); }
         return 0;
     }
@@ -33,9 +45,8 @@ public class RAMScoresRepo implements ScoresRepo {
     public String getTopPlayer() {
         Optional<Map.Entry<String, Integer>> optional =  map.entrySet()
                 .stream()
-                .max(Comparator.comparing(Map.Entry::getValue));
-        if (optional.isPresent()) { return optional.get().getKey(); }
-        return null;
+                .max(Map.Entry.comparingByValue());
+        return optional.map(Map.Entry::getKey).orElse(null);
     }
 
     @Override

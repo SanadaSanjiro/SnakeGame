@@ -1,7 +1,5 @@
 package snake.audio;
 
-import snake.WavePlayer;
-
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;

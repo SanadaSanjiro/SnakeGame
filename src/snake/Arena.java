@@ -11,10 +11,10 @@ package snake;
  * @author NDIAPPINK
  */
 
-import snake.audio.MidiAudioPlayer;
-import snake.audio.WaveAudioPlayer;
+import snake.audio.*;
 import snake.credits.CreditsRunner;
-import snake.repo.memory.RAMScoresRepo;
+import snake.repo.ScoresRepo;
+import snake.repo.file.FileScoresRepo;
 import snake.repo.sql.SQLScoresRepo;
 
 import java.awt.*;
@@ -53,9 +53,9 @@ public class Arena extends JPanel implements ActionListener {
     private final MidiPlayer midiPlayer = MidiAudioPlayer.getPlayer();
 
     public Arena() {
-        repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
+        //repo = new SQLScoresRepo(); // remove slashes to use SQL repository for top scores
         //repo = new RAMScoresRepo(); // remove slashes to use RAM repository for top scores
-        //private boolean isOver;
+        repo = new FileScoresRepo(); // remove slashes to use FILE repository for top scores
         KeyListener keyListener = new TAdapter();
         addKeyListener(keyListener);
         setBackground(Color.black);

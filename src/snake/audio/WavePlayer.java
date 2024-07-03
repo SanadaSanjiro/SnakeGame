@@ -1,4 +1,4 @@
-package snake;
+package snake.audio;
 
 import java.io.File;
 
